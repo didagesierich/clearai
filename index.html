@@ -68,11 +68,20 @@ headers:{
 body:JSON.stringify({text})
 })
 
-const data=await r.json()
+const data = await r.json()
 
-document.getElementById("result").textContent=
-JSON.stringify(data,null,2)
+let output
 
+try {
+  const content = data.choices[0].message.content
+  output = JSON.parse(content)
+} catch {
+  output = data
+}
+
+document.getElementById("result").textContent =
+JSON.stringify(output, null, 2)
+  
 }
 
 </script>
