@@ -30,8 +30,10 @@ content:text
 
 const data = await response.json()
 
-return new Response(JSON.stringify(data),{
-headers:{ "Content-Type":"application/json" }
-})
+const result = data.choices[0].message.content
 
+return new Response(JSON.stringify({ result }),{
+  headers:{ "Content-Type":"application/json" }
+})
+  
 }
