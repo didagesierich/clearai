@@ -1,90 +1,552 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>ClearAI</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ClearAI — AI Governance Quick Scan</title>
+  <style>
+    /* ── design tokens ── */
+    :root {
+      --bg:        #0f1115;
+      --surface:   #16191f;
+      --surface2:  #1d2128;
+      --border:    #2a4a6b;
+      --border-dim:#1a2e42;
+      --text:      #d0d3da;
+      --muted:     #7a8290;
+      --focus:     #6aacdf;
+      --ok:        #5fb87a;
+      --warn:      #e8c55a;
+      --danger:    #e06060;
+      --btn:       #6b1f2a;
+      --btn-hover: #852535;
+      --btn-text:  #f2ecec;
+      --mono: ui-monospace, "Cascadia Code", "Fira Code", Menlo, monospace;
+      --sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+    }
 
-<style>
-body{
-background:#0b0f18;
-color:white;
-font-family:system-ui;
-padding:40px;
-}
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
-textarea{
-width:100%;
-height:200px;
-background:#0f1625;
-color:white;
-border:1px solid #2b3b55;
-padding:12px;
-border-radius:8px;
-}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-button{
-margin-top:10px;
-padding:10px 20px;
-background:#d94c5f;
-border:none;
-color:white;
-border-radius:6px;
-cursor:pointer;
-}
+    body {
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--text);
+      background: var(--bg);
+      min-height: 100vh;
+      padding: 40px 16px 80px;
+      /* subtle grid texture */
+      background-image:
+        linear-gradient(rgba(42,74,107,.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(42,74,107,.06) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
 
-pre{
-background:#0f1625;
-padding:20px;
-margin-top:20px;
-border-radius:8px;
-}
-</style>
+    /* ── layout ── */
+    .page {
+      max-width: 680px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
 
+    /* ── header ── */
+    .header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, #1f3f5b 0%, #0f1115 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -.2px;
+      color: #e8eaf0;
+    }
+
+    .tagline {
+      font-size: 13px;
+      color: var(--muted);
+      max-width: 52ch;
+    }
+
+    /* ── card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-dim);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .card-head {
+      padding: 13px 18px 11px;
+      border-bottom: 1px solid var(--border-dim);
+      background: linear-gradient(180deg, rgba(42,74,107,.12) 0%, transparent 100%);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .card-body { padding: 18px; }
+
+    /* ── form ── */
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 8px;
+      letter-spacing: .3px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      resize: vertical;
+      font-family: var(--sans);
+      font-size: 14px;
+      color: var(--text);
+      background: rgba(9, 11, 16, .55);
+      border: 1px solid var(--border-dim);
+      border-radius: 10px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      -webkit-text-fill-color: var(--text);
+    }
+    textarea::placeholder { color: #4a5260; }
+    textarea:focus {
+      border-color: var(--focus);
+      box-shadow: 0 0 0 3px rgba(106,172,223,.15);
+    }
+
+    /* ── button ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 22px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.07);
+      background: var(--btn);
+      color: var(--btn-text);
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .2px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(107,31,42,.3);
+      transition: background .15s, transform .08s, box-shadow .15s, opacity .15s;
+      margin-top: 14px;
+    }
+    .btn:hover:not(:disabled) { background: var(--btn-hover); box-shadow: 0 6px 18px rgba(107,31,42,.4); }
+    .btn:active:not(:disabled) { transform: translateY(1px); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+    .btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+
+    .btn-icon { font-size: 16px; line-height: 1; }
+
+    /* ── status ── */
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 14px;
+      padding: 9px 13px;
+      border-radius: 9px;
+      border: 1px solid var(--border-dim);
+      background: rgba(9,11,16,.4);
+      font-size: 13px;
+      color: var(--muted);
+      min-height: 40px;
+    }
+    .status.ok   { border-color: rgba(95,184,122,.35); color: var(--ok); }
+    .status.warn { border-color: rgba(232,197,90,.35);  color: var(--warn); }
+    .status.err  { border-color: rgba(224,96,96,.35);   color: var(--danger); }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+      opacity: .7;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,.1);
+      border-top-color: var(--focus);
+      border-radius: 50%;
+      animation: spin .65s linear infinite;
+      flex-shrink: 0;
+    }
+
+    /* ── result ── */
+    #resultCard { display: none; }
+    #resultCard.visible { display: block; }
+
+    .result-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .result-row {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 8px 16px;
+      padding: 12px 0;
+      border-bottom: 1px dashed rgba(42,74,107,.25);
+      align-items: start;
+    }
+    .result-row:last-child { border-bottom: none; }
+
+    .rk {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .55px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding-top: 1px;
+    }
+
+    .rv {
+      font-size: 13px;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .risk-low    { color: var(--ok);     font-weight: 700; }
+    .risk-medium { color: var(--warn);   font-weight: 700; }
+    .risk-high   { color: var(--danger); font-weight: 700; }
+
+    /* lists inside result */
+    .rv ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .rv ul li {
+      display: flex;
+      gap: 8px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .rv ul li::before {
+      content: "›";
+      color: var(--border);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── raw JSON toggle ── */
+    details { margin-top: 16px; }
+    summary {
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+      padding: 4px 2px;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    summary::before { content: "▸"; transition: transform .15s; }
+    details[open] summary::before { transform: rotate(90deg); }
+    summary:hover { color: var(--text); }
+    summary:focus-visible { outline: 2px solid var(--focus); border-radius: 4px; }
+
+    pre {
+      margin-top: 10px;
+      padding: 13px;
+      border-radius: 10px;
+      border: 1px solid rgba(42,74,107,.4);
+      background: rgba(7, 9, 13, .7);
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.5;
+      color: #b8bfc9;
+      overflow: auto;
+      max-height: 300px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* ── footer ── */
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #3a424f;
+      padding-top: 4px;
+    }
+
+    /* ── demo button ── */
+    .demo-link {
+      background: none;
+      border: none;
+      color: var(--focus);
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .demo-link:hover { color: #9fd0ff; }
+    .demo-link:focus-visible { outline: 2px solid var(--focus); border-radius: 3px; }
+  </style>
 </head>
 
 <body>
+  <div class="page">
 
-<h1>ClearAI</h1>
+    <!-- header -->
+    <header class="header">
+      <div class="logo-row">
+        <div class="logo-mark" aria-hidden="true">🔍</div>
+        <h1>ClearAI</h1>
+      </div>
+      <p class="tagline">AI Governance Quick Scan — paste any AI-related text to detect compliance and transparency risks.</p>
+    </header>
 
-<textarea id="text"></textarea>
+    <!-- input card -->
+    <div class="card" id="inputCard">
+      <div class="card-head">Text to analyze</div>
+      <div class="card-body">
+        <label for="inputText">
+          Paste an AI product description, policy excerpt, marketing copy, or terms of service.
+        </label>
+        <textarea
+          id="inputText"
+          placeholder="e.g. "Our AI guarantees 100% accurate results. We may store your inputs to improve our models.""
+          aria-describedby="inputHint"
+        ></textarea>
 
-<br>
+        <p id="inputHint" style="font-size:12px;color:var(--muted);margin-top:8px;">
+          No data is stored on our servers. Or try a
+          <button class="demo-link" id="demoBtn" type="button">demo example</button>.
+        </p>
 
-<button onclick="scan()">Analyze</button>
+        <button class="btn" id="analyzeBtn" type="button">
+          <span class="btn-icon" aria-hidden="true">▶</span>
+          Analyze text
+        </button>
 
-<pre id="result"></pre>
+        <div
+          id="statusBar"
+          class="status"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <span class="status-dot" aria-hidden="true"></span>
+          <span id="statusMsg">Ready — paste text and click Analyze.</span>
+        </div>
+      </div>
+    </div>
 
-<script>
+    <!-- result card -->
+    <div class="card" id="resultCard" aria-live="polite">
+      <div class="card-head">Analysis result</div>
+      <div class="card-body">
+        <div class="result-grid">
 
-async function scan(){
+          <div class="result-row">
+            <div class="rk">Risk level</div>
+            <div class="rv" id="rRisk">—</div>
+          </div>
 
-const text=document.getElementById("text").value
+          <div class="result-row">
+            <div class="rk">Issues found</div>
+            <div class="rv" id="rIssues">—</div>
+          </div>
 
-const r=await fetch("/.netlify/functions/analyze",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({text})
-})
+          <div class="result-row">
+            <div class="rk">Recommendations</div>
+            <div class="rv" id="rRecs">—</div>
+          </div>
 
-const data = await r.json()
+        </div>
 
-let output
+        <details>
+          <summary>Raw JSON response</summary>
+          <pre id="rawJson"></pre>
+        </details>
+      </div>
+    </div>
 
-try {
-  const content = data.choices[0].message.content
-  output = JSON.parse(content)
-} catch {
-  output = data
-}
+    <p class="footer">ClearAI · Hackathon MVP · Client data never stored</p>
 
-document.getElementById("result").textContent =
-JSON.stringify(output, null, 2)
-  
-}
+  </div><!-- /page -->
 
-</script>
+  <script>
+    (function () {
+      "use strict";
 
+      const inputTextEl = document.getElementById("inputText");
+      const analyzeBtn  = document.getElementById("analyzeBtn");
+      const demoBtn     = document.getElementById("demoBtn");
+      const statusBar   = document.getElementById("statusBar");
+      const statusMsg   = document.getElementById("statusMsg");
+      const resultCard  = document.getElementById("resultCard");
+      const rRisk       = document.getElementById("rRisk");
+      const rIssues     = document.getElementById("rIssues");
+      const rRecs       = document.getElementById("rRecs");
+      const rawJson     = document.getElementById("rawJson");
+
+      /* ── status helper ── */
+      function setStatus(kind, msg, spinning) {
+        statusBar.className = "status" + (kind ? " " + kind : "");
+        const icon = spinning
+          ? '<span class="spinner" aria-hidden="true"></span>'
+          : '<span class="status-dot" aria-hidden="true"></span>';
+        statusBar.innerHTML = icon + "<span>" + escHtml(msg) + "</span>";
+      }
+
+      function escHtml(s) {
+        return String(s ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      /* ── busy ── */
+      function setBusy(busy) {
+        analyzeBtn.disabled            = busy;
+        demoBtn.disabled               = busy;
+        inputTextEl.disabled           = busy;
+        document.body.style.cursor     = busy ? "progress" : "";
+      }
+
+      /* ── render list ── */
+      function renderList(el, items) {
+        if (!Array.isArray(items) || items.length === 0) {
+          el.textContent = "None identified.";
+          return;
+        }
+        const ul = document.createElement("ul");
+        for (const item of items) {
+          const li = document.createElement("li");
+          li.textContent = String(item);
+          ul.appendChild(li);
+        }
+        el.innerHTML = "";
+        el.appendChild(ul);
+      }
+
+      /* ── render result ── */
+      function renderResult(data, rawText) {
+        const risk = String(data.risk_level ?? "Unknown");
+        rRisk.textContent = risk;
+        rRisk.className   = "rv";
+        const rk = risk.toLowerCase();
+        if (rk === "low")    rRisk.classList.add("risk-low");
+        if (rk === "medium") rRisk.classList.add("risk-medium");
+        if (rk === "high")   rRisk.classList.add("risk-high");
+
+        renderList(rIssues, data.issues);
+        renderList(rRecs,   data.recommendations);
+
+        rawJson.textContent = rawText;
+        resultCard.classList.add("visible");
+        resultCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      /* ── main ── */
+      async function onAnalyze() {
+        const text = (inputTextEl.value || "").trim();
+
+        if (!text) {
+          setStatus("warn", "Please paste some text first.");
+          inputTextEl.focus();
+          return;
+        }
+
+        setBusy(true);
+        resultCard.classList.remove("visible");
+        setStatus(null, "Analyzing…", true);
+
+        try {
+          const res = await fetch("/.netlify/functions/analyze", {
+            method:  "POST",
+            headers: { "Content-Type": "application/json" },
+            body:    JSON.stringify({ text }),
+          });
+
+          const rawText = await res.text();
+
+          let data;
+          try { data = JSON.parse(rawText); }
+          catch (_) { throw new Error("Server returned non-JSON response."); }
+
+          if (!res.ok) {
+            throw new Error(data?.error || "Server error " + res.status);
+          }
+
+          renderResult(data, rawText);
+          setStatus("ok", "Analysis complete.");
+
+        } catch (err) {
+          setStatus("err", String(err?.message || err));
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      /* ── demo ── */
+      demoBtn.addEventListener("click", () => {
+        inputTextEl.value =
+          "Our AI model guarantees 100% accurate medical diagnoses with no margin of error.\n" +
+          "We may share your health data with third-party partners for research purposes.\n" +
+          "By using this service you consent to our terms. The AI is always right — no human review needed.\n" +
+          "Outputs should be treated as professional medical advice.";
+        inputTextEl.focus();
+        setStatus(null, "Demo text loaded. Click Analyze text.");
+      });
+
+      analyzeBtn.addEventListener("click", onAnalyze);
+
+      /* Ctrl/Cmd+Enter shortcut */
+      document.addEventListener("keydown", function (e) {
+        const mod = /mac/i.test(navigator.platform) ? e.metaKey : e.ctrlKey;
+        if (mod && e.key === "Enter" && !analyzeBtn.disabled) {
+          e.preventDefault();
+          onAnalyze();
+        }
+      });
+
+    })();
+  </script>
 </body>
 </html>
